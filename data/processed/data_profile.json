@@ -1,0 +1,58 @@
+{
+  "generated_at_utc": "2026-07-26T16:35:58.396766+00:00",
+  "source_file": "data/raw/complaints.csv",
+  "processed_file": "data/processed/cfpb_complaints_2023_2025.csv",
+  "analysis_window": {
+    "start": "2023-01-01",
+    "end_exclusive": "2026-01-01",
+    "years": [
+      2023,
+      2024,
+      2025
+    ],
+    "reason": "2026 is partial in the downloaded source; the raw maximum Date received is 2026-07-26."
+  },
+  "raw_row_count": 17270511,
+  "raw_date_min": "2011-12-01",
+  "raw_date_max": "2026-07-26",
+  "processed_row_count": 9363711,
+  "processed_unique_complaint_ids": 9363711,
+  "duplicate_rows_in_processed_window": 0,
+  "duplicate_complaint_ids_in_processed_window": 0,
+  "processed_year_counts": {
+    "2023": 1185973,
+    "2024": 2734308,
+    "2025": 5443430
+  },
+  "raw_missing_counts": {
+    "Date received": 0,
+    "Product": 122,
+    "Sub-product": 145,
+    "Issue": 151,
+    "Sub-issue": 231844,
+    "Company public response": 5483124,
+    "Company": 0,
+    "State": 21233,
+    "ZIP code": 2114,
+    "Tags": 11667947,
+    "Submitted via": 0,
+    "Date sent to company": 116758,
+    "Company response to consumer": 540556,
+    "Timely response?": 0,
+    "Complaint ID": 6771
+  },
+  "category_cardinality": {
+    "Product": 14,
+    "Sub-product": 59,
+    "Issue": 94,
+    "Sub-issue": 214,
+    "Company public response": 11,
+    "Company": 5138,
+    "State": 63,
+    "Tags": 4,
+    "Submitted via": 5,
+    "Company response to consumer": 6,
+    "Timely response?": 2
+  },
+  "privacy_decision": "Consumer complaint narrative was excluded from the processed dataset and public artifacts."
+}

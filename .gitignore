@@ -1,0 +1,22 @@
+# Large source and row-level analysis files are intentionally not published.
+data/raw/*
+!data/raw/.gitkeep
+
+data/processed/*.csv
+!data/processed/data_profile.json
+data/processed/*.db
+data/processed/*.db-*
+
+# Compact, dashboard-ready aggregates are safe to version and are included.
+!data/processed/summary/
+!data/processed/summary/*.csv
+
+# Local inspection output generated during workbook validation.
+tableau/*.inspect.ndjson
+
+# System and editor files.
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+node_modules
