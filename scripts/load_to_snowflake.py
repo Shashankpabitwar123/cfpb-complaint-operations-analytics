@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Load the privacy-minimized CFPB 2023-2025 prepared extract into Snowflake.
 
-Credentials are read from environment variables only. The default authentication
-method is Snowflake external-browser authentication, so no password is stored in
+Credentials are read from an ignored local .env file or environment variables.
+A native Snowflake account uses its local password; no credential is stored in
 the repository. Use --replace only when intentionally reloading the raw table.
 """
 
@@ -60,13 +60,82 @@ def connection_parameters(bootstrap: bool = False) -> dict[str, str]:
     return parameters
 
 
+def split_sql_statements(sql: str) -> list[str]:
+    """Split Snowflake SQL on delimiters outside quoted strings and comments."""
+    statements: list[str] = []
+    buffer: list[str] = []
+    in_single_quote = False
+    in_double_quote = False
+    in_line_comment = False
+    position = 0
+
+    while position < len(sql):
+        character = sql[position]
+        next_character = sql[position + 1] if position + 1 < len(sql) else ""
+
+        if in_line_comment:
+            if character == "\n":
+                in_line_comment = False
+                buffer.append(character)
+            position += 1
+            continue
+
+        if in_single_quote:
+            buffer.append(character)
+            if character == "'" and next_character == "'":
+                buffer.append(next_character)
+                position += 2
+                continue
+            if character == "'":
+                in_single_quote = False
+            position += 1
+            continue
+
+        if in_double_quote:
+            buffer.append(character)
+            if character == '"' and next_character == '"':
+                buffer.append(next_character)
+                position += 2
+                continue
+            if character == '"':
+                in_double_quote = False
+            position += 1
+            continue
+
+        if character == "-" and next_character == "-":
+            in_line_comment = True
+            position += 2
+            continue
+        if character == "'":
+            in_single_quote = True
+            buffer.append(character)
+            position += 1
+            continue
+        if character == '"':
+            in_double_quote = True
+            buffer.append(character)
+            position += 1
+            continue
+        if character == ";":
+            statement = "".join(buffer).strip()
+            if statement:
+                statements.append(statement)
+            buffer = []
+            position += 1
+            continue
+
+        buffer.append(character)
+        position += 1
+
+    trailing_statement = "".join(buffer).strip()
+    if trailing_statement:
+        statements.append(trailing_statement)
+    return statements
+
+
 def execute_sql_file(cursor: snowflake.connector.cursor.SnowflakeCursor, path: Path) -> None:
-    """Execute the intentionally simple, semicolon-delimited setup script."""
-    sql_without_comments = "\n".join(
-        line for line in path.read_text(encoding="utf-8").splitlines()
-        if not line.strip().startswith("--")
-    )
-    for statement in sql_without_comments.split(";"):
+    """Execute a setup script while preserving semicolons inside SQL string literals."""
+    for statement in split_sql_statements(path.read_text(encoding="utf-8")):
         statement = statement.strip()
         if statement:
             cursor.execute(statement)
