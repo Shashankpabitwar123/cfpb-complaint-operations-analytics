@@ -52,7 +52,7 @@ CHECKS = {
     """,
     "raw_distinct_id_to_fact_count": """
         select
-          (select count(distinct try_to_number(regexp_replace(complaint_id_raw, '\\.0$', ''))) from raw.complaints_csv) as expected_value,
+          (select count(distinct complaint_id_raw) from raw.complaints_csv) as expected_value,
           (select count(*) from analytics.fct_complaints) as actual_value
     """,
     "monthly_mart_to_fact_count": """
