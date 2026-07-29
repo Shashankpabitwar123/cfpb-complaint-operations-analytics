@@ -52,11 +52,12 @@ CFPB CSV (2023-2025 prepared extract)
 
 ## Execution evidence
 
-The code is complete, but the following evidence is generated only after a real Snowflake run:
+The Snowflake deployment was executed on 2026-07-29 with the restricted `CFPB_PORTFOLIO_ROLE` after one-time setup:
 
-1. `dbt debug`, `dbt run`, and `dbt test` output.
-2. `data/processed/snowflake_validation.json` with all reconciliation checks passing.
-3. `data/exports/tableau/*.csv` generated from the dbt marts.
-4. A refreshed Tableau Public extract/dashboard link and screenshots.
+1. `dbt debug` confirmed the account, warehouse, database, role, and profile connection.
+2. `dbt run` built 15 models, including a 9,363,711-row fact table.
+3. `dbt test` passed all 31 data-quality and relationship tests.
+4. `data/processed/snowflake_validation.json` recorded six passing source-to-fact and fact-to-mart checks.
+5. `data/exports/tableau/*.csv` and `tableau/CFPB_Tableau_Source.xlsx` were regenerated from the dbt marts.
 
-Until these artifacts exist, the project should accurately be described as having a Snowflake/dbt implementation ready for execution—not as a completed live warehouse deployment.
+The remaining public-facing step is to refresh and republish the existing Tableau Public dashboard from this extract snapshot. Tableau Public remains an extract-based presentation layer, not a live Snowflake connection.

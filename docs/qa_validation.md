@@ -26,20 +26,20 @@
 | State-summary total | 9,363,711 | 9,363,711 | Pass |
 | Consumer narrative in processed extract | No | No | Pass |
 
-## Required Snowflake/dbt checks before dashboard refresh
+## Completed Snowflake/dbt checks
 
-These are implemented in `mart_data_quality_reconciliation` and `scripts/validate_snowflake_pipeline.py`. They must be rerun after every raw reload and before publishing a Tableau extract.
+These checks were executed on 2026-07-29 after loading the privacy-minimized 2023–2025 extract. They are implemented in `mart_data_quality_reconciliation` and `scripts/validate_snowflake_pipeline.py`, and must be rerun after every raw reload and before publishing a Tableau extract.
 
-| Check | Comparison | Required result |
+| Check | Comparison | Executed result |
 |---|---|---|
-| Raw-to-fact row count | `raw.complaints_csv` vs `fct_complaints` | Equal |
-| Raw distinct IDs-to-fact count | Raw distinct cast Complaint IDs vs fact rows | Equal |
-| Fact duplicate IDs | Fact rows vs distinct Complaint IDs | Difference = 0 |
-| Invalid dates in fact | Null Date received values | 0 |
-| Monthly mart reconciliation | Sum of `mart_monthly_operations.complaint_volume` vs fact rows | Equal |
-| Product mart reconciliation | Sum of `mart_product_workload.complaint_volume` vs fact rows | Equal |
-| Response mart reconciliation | Sum of `mart_response_performance.complaint_volume` vs fact rows | Equal |
-| dbt schema tests | `dbt test` | All pass |
+| Raw-to-fact row count | `raw.complaints_csv` vs `fct_complaints` | 9,363,711 = 9,363,711 — Pass |
+| Raw distinct IDs-to-fact count | Raw distinct Complaint IDs vs fact rows | 9,363,711 = 9,363,711 — Pass |
+| Fact duplicate IDs | Fact rows vs distinct Complaint IDs | 0 — Pass |
+| Invalid dates in fact | Null Date received values | 0 — Pass |
+| Monthly mart reconciliation | Sum of `mart_monthly_operations.complaint_volume` vs fact rows | 9,363,711 = 9,363,711 — Pass |
+| Product mart reconciliation | Sum of `mart_product_workload.complaint_volume` vs fact rows | 9,363,711 = 9,363,711 — Pass |
+| Response mart reconciliation | Sum of `mart_response_performance.complaint_volume` vs fact rows | 9,363,711 = 9,363,711 — Pass |
+| dbt schema tests | `dbt test` | 31 passed, 0 warnings, 0 errors |
 
 ## Tableau reconciliation protocol
 
@@ -53,4 +53,4 @@ After rebuilding the aggregate workbook and refreshing Tableau:
 
 ## Current deployment status
 
-The local baseline checks are complete. The Snowflake/dbt and Tableau-refresh checks are **pending the account-specific execution**; no placeholder pass result is recorded. The generated `snowflake_validation.json` is intentionally ignored by Git because it is execution evidence, not a precomputed artifact.
+The local baseline and Snowflake/dbt checks are complete. The Tableau source workbook has been rebuilt from the generated aggregate marts and its Quality Reconciliation sheet shows only `PASS`. The remaining deployment step is a manual refresh and republish of the existing Tableau Public dashboard. The generated `snowflake_validation.json` is intentionally ignored by Git because it is execution evidence, not a precomputed artifact.

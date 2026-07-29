@@ -110,11 +110,12 @@ The original download and row-level processed data are not committed because the
 |---|---|
 | 2023–2025 local source validation | Complete: 9,363,711 rows, 9,363,711 unique Complaint IDs, 0 duplicate IDs |
 | Initial compact-summary reconciliation | Complete: monthly and state totals reconcile to the validated record count |
-| Snowflake/dbt project code | Complete and testable |
-| Snowflake load, dbt run/test, and warehouse reconciliation | Pending execution in the account selected for this project |
-| Tableau Public refresh from generated dbt mart extract | Pending after the verified warehouse run |
+| Snowflake/dbt project code | Complete and executed |
+| Snowflake load, dbt run/test, and warehouse reconciliation | Complete on 2026-07-29: 9,363,711 raw/fact rows, 15 dbt models built, 31 tests passed, 6 reconciliation checks passed |
+| Tableau source workbook from generated dbt mart extract | Complete: rebuilt and visually verified as a Snowflake dbt mart extract snapshot |
+| Tableau Public refresh from generated dbt mart extract | Pending manual refresh and republish of the existing dashboard |
 
-No resume or portfolio claim should say Snowflake/dbt or a refreshed Tableau extract was executed until the pending execution evidence is generated. The local and SQL implementation are present; the remaining account-specific deployment is deliberately explicit.
+Resume and portfolio materials may accurately claim Snowflake, dbt, SQL, data-quality testing, and reconciliation for this project. Do not call the public Tableau dashboard a live Snowflake connection, and do not claim it was refreshed from this extract until the manual Tableau republish step is complete.
 
 ## Documentation
 

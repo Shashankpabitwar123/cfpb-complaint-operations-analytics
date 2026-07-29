@@ -68,6 +68,7 @@ function parseCsv(text) {
   }
   return rows.map((r, rowIndex) => r.map((value) => {
     if (rowIndex === 0 || value === "") return value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
     return /^-?\d+(\.\d+)?$/.test(value) ? Number(value) : value;
   }));
 }
@@ -128,6 +129,17 @@ for (const [sheetName, filename] of sources) {
   const used = sheet.getUsedRange();
   const lastColumn = columnName(rows[0].length);
   sheet.getRange(`A1:${lastColumn}1`).format = { fill: "#0B3A61", font: { bold: true, color: "#FFFFFF" }, horizontalAlignment: "center", wrapText: true };
+  for (let columnIndex = 0; columnIndex < rows[0].length; columnIndex += 1) {
+    const header = String(rows[0][columnIndex]);
+    const dataRange = sheet.getRangeByIndexes(1, columnIndex, Math.max(rows.length - 1, 1), 1);
+    if (header.endsWith("_date") || header.endsWith("_start")) {
+      dataRange.format.numberFormat = "yyyy-mm-dd";
+    } else if (header.includes("_rate") || header.includes("_share")) {
+      dataRange.format.numberFormat = "0.0%";
+    } else if (header.includes("volume") || header.includes("count") || header.includes("change") || header.includes("difference")) {
+      dataRange.format.numberFormat = "#,##0";
+    }
+  }
   used.format.autofitColumns();
   used.format.autofitRows();
   sheet.freezePanes.freezeRows(1);
