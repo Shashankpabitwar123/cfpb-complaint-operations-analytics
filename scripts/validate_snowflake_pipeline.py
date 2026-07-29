@@ -9,10 +9,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import snowflake.connector
+from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_PATH = PROJECT_ROOT / "data" / "processed" / "snowflake_validation.json"
+
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 def required_environment(name: str) -> str:

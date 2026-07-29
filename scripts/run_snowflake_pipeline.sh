@@ -26,10 +26,17 @@ if ! command -v dbt >/dev/null 2>&1; then
   exit 1
 fi
 
-set -a
-# shellcheck disable=SC1091
-source "$project_root/.env"
-set +a
+eval "$(python3 - "$project_root/.env" <<'PY'
+from pathlib import Path
+from dotenv import dotenv_values
+import shlex
+import sys
+
+for name, value in dotenv_values(Path(sys.argv[1])).items():
+    if value is not None:
+        print(f'export {name}={shlex.quote(value)}')
+PY
+)"
 
 mkdir -p "$profile_dir"
 cp "$dbt_root/profiles.yml.example" "$profile_dir/profiles.yml"

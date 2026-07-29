@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 
 import snowflake.connector
+from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,8 @@ MARTS = {
     "mart_company_concentration": "MART_COMPANY_CONCENTRATION",
     "mart_data_quality_reconciliation": "MART_DATA_QUALITY_RECONCILIATION",
 }
+
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 def required_environment(name: str) -> str:

@@ -13,11 +13,14 @@ import os
 from pathlib import Path
 
 import snowflake.connector
+from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_FILE = PROJECT_ROOT / "data" / "processed" / "cfpb_complaints_2023_2025.csv"
 SETUP_SQL = PROJECT_ROOT / "sql" / "snowflake" / "01_setup.sql"
+
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 def required_environment(name: str) -> str:
