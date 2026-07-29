@@ -1,0 +1,20 @@
+name: cfpb_complaint_operations
+version: '1.0.0'
+config-version: 2
+profile: cfpb_complaint_operations
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  cfpb_complaint_operations:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    dimensions:
+      +materialized: table
+    marts:
+      +materialized: table

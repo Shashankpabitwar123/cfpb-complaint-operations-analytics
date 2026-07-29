@@ -1,22 +1,56 @@
-# Validation record
+# Data-quality and reconciliation record
 
-## Independent checks completed
+## Rules applied to the local prepared extract
 
-| Check | Result |
-|---|---:|
-| Processed rows | 9,363,711 |
-| Unique Complaint IDs | 9,363,711 |
-| Duplicate Complaint IDs | 0 |
-| Date range | 2023-01-01 to 2025-12-31 |
-| Monthly periods | 36 |
-| Timely-response values | `Yes` and `No` only |
-| Invalid derived timely flags | 0 |
-| Consumer complaint narrative in processed extract | No |
-| Monthly-summary total | 9,363,711 |
-| State-summary total | 9,363,711 |
+| Rule | Treatment | Baseline result |
+|---|---|---:|
+| Analysis window | Keep full years 2023–2025; exclude partial 2026 | Pass |
+| Record grain | One published record per Complaint ID | Pass |
+| Duplicate Complaint IDs | Investigate and stop if count is nonzero | 0 |
+| Date received | Must cast to a valid date in the analysis window | Pass |
+| Required categories | Preserve blanks as `Unknown`; do not drop source rows | Pass |
+| Timely response | Standardize to `Yes`, `No`, or `Unknown` | Pass |
+| Privacy fields | Do not include consumer narrative; Snowflake/Tableau additionally omit ZIP and tags | Pass |
+| Product taxonomy | Keep source product labels distinct unless a mapping is documented | Pass |
 
-## Reconciliation notes
+## Completed local reconciliation
 
-- All dashboard-facing complaint counts use the same validated record grain: one row per Complaint ID.
-- The response-performance rate uses only records with known timely-response values in its denominator; the denominator is exported with the rate.
-- `Unknown` remains visible for missing categorical fields rather than being dropped from aggregate counts.
+| Check | Expected | Actual | Status |
+|---|---:|---:|---|
+| Processed rows | 9,363,711 | 9,363,711 | Pass |
+| Unique Complaint IDs | 9,363,711 | 9,363,711 | Pass |
+| Duplicate Complaint IDs | 0 | 0 | Pass |
+| Analysis date range | 2023-01-01 to 2025-12-31 | 2023-01-01 to 2025-12-31 | Pass |
+| Monthly periods | 36 | 36 | Pass |
+| Monthly-summary total | 9,363,711 | 9,363,711 | Pass |
+| State-summary total | 9,363,711 | 9,363,711 | Pass |
+| Consumer narrative in processed extract | No | No | Pass |
+
+## Required Snowflake/dbt checks before dashboard refresh
+
+These are implemented in `mart_data_quality_reconciliation` and `scripts/validate_snowflake_pipeline.py`. They must be rerun after every raw reload and before publishing a Tableau extract.
+
+| Check | Comparison | Required result |
+|---|---|---|
+| Raw-to-fact row count | `raw.complaints_csv` vs `fct_complaints` | Equal |
+| Raw distinct IDs-to-fact count | Raw distinct cast Complaint IDs vs fact rows | Equal |
+| Fact duplicate IDs | Fact rows vs distinct Complaint IDs | Difference = 0 |
+| Invalid dates in fact | Null Date received values | 0 |
+| Monthly mart reconciliation | Sum of `mart_monthly_operations.complaint_volume` vs fact rows | Equal |
+| Product mart reconciliation | Sum of `mart_product_workload.complaint_volume` vs fact rows | Equal |
+| Response mart reconciliation | Sum of `mart_response_performance.complaint_volume` vs fact rows | Equal |
+| dbt schema tests | `dbt test` | All pass |
+
+## Tableau reconciliation protocol
+
+After rebuilding the aggregate workbook and refreshing Tableau:
+
+1. Filter the dashboard to All years and compare Total Complaints with `fct_complaints` and `mart_monthly_operations` total.
+2. Compare annual volume cards with `mart_monthly_operations` grouped by `received_year`.
+3. Compare Product Workload total and Response Performance total with Total Complaints.
+4. For Timely Response Rate, compare the shown numerator and denominator against `timely_response_count` and `timely_response_denominator`; never divide by all complaints when `Unknown` exists.
+5. Save a screenshot/PDF and record the Tableau Public URL after the values reconcile.
+
+## Current deployment status
+
+The local baseline checks are complete. The Snowflake/dbt and Tableau-refresh checks are **pending the account-specific execution**; no placeholder pass result is recorded. The generated `snowflake_validation.json` is intentionally ignored by Git because it is execution evidence, not a precomputed artifact.

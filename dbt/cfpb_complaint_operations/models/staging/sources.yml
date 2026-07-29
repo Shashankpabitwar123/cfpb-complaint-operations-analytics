@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('SNOWFLAKE_DATABASE', 'CFPB_ANALYTICS') }}"
+    schema: RAW
+    tables:
+      - name: complaints_csv
+        identifier: COMPLAINTS_CSV
+        description: >
+          Privacy-minimized, prepared CFPB complaint extract. It contains only the
+          2023-2025 analysis window and excludes consumer narratives, ZIP codes, and tags.
+        columns:
+          - name: COMPLAINT_ID_RAW
+            description: Source Complaint ID stored as text before staging casts it to a number.
+            tests: [not_null, unique]
+          - name: DATE_RECEIVED_RAW
+            description: Source Date received stored as text before staging casts it to a date.
+            tests: [not_null]

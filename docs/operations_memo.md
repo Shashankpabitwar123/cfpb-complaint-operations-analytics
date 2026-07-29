@@ -1,34 +1,29 @@
-# CFPB Complaint Operations Analytics — findings memo
+# CFPB Complaint Operations Analytics — findings and recommendations
 
 ## Scope
 
-This memo describes 9,363,711 published CFPB complaint records received from 2023-01-01 through 2025-12-31. It describes observed complaint workload and published response-record patterns; it does not measure market-share-adjusted company quality or causal performance.
+This analysis covers 9,363,711 published CFPB complaint records received from 2023-01-01 through 2025-12-31. It measures observed published complaint workload and source response-record patterns. It does not measure causality, customer satisfaction, resolution time, validated misconduct, monetary harm, or market-share-adjusted company quality.
 
-## Executive findings
+## Operational findings and recommended actions
 
-1. **Observed workload grew rapidly.** Complaint volume increased from 1,185,973 records in 2023 to 2,734,308 in 2024 (+130.55%) and 5,443,430 in 2025 (+99.08%). The monthly peak was December 2023 (123,067), December 2024 (303,982), and October 2025 (519,813).
-2. **Credit reporting dominates the work queue.** The current label `Credit reporting or other personal consumer reports` represents 7,578,201 records (80.93%). A second, older/alternate credit-reporting label contributes another 557,760 records (5.96%). These labels should remain separate in headline reporting unless a documented taxonomy bridge is added.
-3. **The largest reported issues are concentrated in reporting accuracy and use.** The three largest product–issue combinations are incorrect information on a report (4,185,700), improper use of a report (1,919,581), and problems with an investigation into an existing problem (1,396,144), all under the dominant credit-reporting product label.
-4. **Published response coverage and reported timeliness are high.** Known public-response coverage was 100.00% in 2023 and 2024 and 99.99% in 2025. Timely-response rate, calculated as `Yes / (Yes + No)`, was 99.57%, 99.72%, and 99.55% respectively. This is a source-field indicator, not a consumer-satisfaction measure.
-5. **Web is the primary intake channel.** Web submissions represented 97.24% of volume in 2023, 98.57% in 2024, and 99.34% in 2025. This supports prioritizing digital intake capacity and web-form quality monitoring.
-6. **Highest observed state counts were Florida (1,340,357), Texas (1,291,762), and California (896,823).** These are raw counts only; they must not be interpreted as population-adjusted complaint rates.
+| Finding | Magnitude | Operational implication | Limitation | Recommended action |
+|---|---:|---|---|---|
+| Workload grew sharply across the full-year comparison window. | 1,185,973 complaints (2023) -> 2,734,308 (2024, +130.55%) -> 5,443,430 (2025, +99.08%). | Intake, classification, and investigation capacity must plan for sustained volume growth rather than a single spike. | Complaint records are observed published workload, not all consumer issues in the market. | Create a monthly capacity/triage review using volume, MoM change, and rolling three-month volume. |
+| Credit-reporting categories dominate reported workload. | The current `Credit reporting or other personal consumer reports` label has 7,578,201 records (80.93%); a separate alternate label has 557,760 (5.96%). | Work queues and root-workload diagnostics should prioritize credit-reporting issues. | Source taxonomy changed/varies across labels; merging labels without a documented bridge would distort reporting. | Maintain product-specific operating queues and create a reviewed taxonomy crosswalk before any combined credit-reporting KPI is published. |
+| A small set of published issue categories drives most observed workload. | Largest product-issue combinations: incorrect information on a report (4,185,700), improper use of a report (1,919,581), and problems with an investigation (1,396,144). | High-volume issue themes are practical candidates for monitoring rules, knowledge content, and routing review. | Issue labels describe the filed complaint; they do not prove an underlying root cause. | Track top issue ranks by product/month and require qualitative review before changing policy or assigning cause. |
+| Digital intake is overwhelmingly web-based. | Web share: 97.24% (2023), 98.57% (2024), 99.34% (2025). | Web-form availability, validation, accessibility, and routing have outsized operational importance. | Channel values describe submission channel, not the consumer journey or channel preference in the broader population. | Add web intake health monitoring and use channel mix as a trigger for form-quality and capacity reviews. |
+| Published timely-response rates are high, while state and company values need context. | Timely response: 99.57% (2023), 99.72% (2024), 99.55% (2025); Florida, Texas, and California have highest raw state counts. | Timely-response monitoring should focus on exceptions and data coverage; geographic/company comparisons need controlled context. | Timely response is a CFPB source indicator, and raw state/company counts lack population, customer-base, product-mix, and market-share denominators. | Display explicit timely-rate denominators, keep `Unknown` visible, apply the 100-complaint company threshold, and avoid per-capita or quality claims without new documented data. |
 
-## Operations implications
+## KPI definitions used in communication
 
-- Plan staffing and triage capacity around the sharply rising credit-reporting workload and the high-volume monthly peaks.
-- Create a taxonomy bridge before making an all-time credit-reporting product total, because source categories reflect different labels.
-- Monitor digital intake flow, validation, and routing because web contributes nearly all submissions.
-- Pair state counts with a documented denominator, such as population or active accounts, before making geographic performance claims.
+- **Complaint volume:** count of unique Complaint IDs; local validation found no duplicate IDs in the 2023–2025 extract.
+- **Timely-response rate:** `Yes / (Yes + No)` for the CFPB `Timely response?` field; `Unknown` is excluded from the denominator.
+- **Known company-response coverage:** known company response count divided by complaint volume. It does not evaluate response quality.
+- **Segment share:** product/channel/state/company observed complaint volume divided by all complaints in the same year. It is not market share.
 
-## Metric definitions
+## Communication guardrails
 
-- **Complaint volume:** count of unique Complaint IDs. The data-quality check found no duplicates in the 2023–2025 extract.
-- **Response coverage:** records with a known company public response divided by all records.
-- **Timely-response rate:** timely `Yes` divided by all known timely outcomes (`Yes` plus `No`).
-- **Product/issue workload:** count of unique Complaint IDs grouped by published CFPB category labels.
-
-## Limitations
-
-- The CFPB database is not a statistical sample; complaint counts are not market-share-adjusted quality measures.
-- Published records can be affected by the CFPB publication process and source taxonomy changes.
-- Results describe complaints received, not validated misconduct, monetary harm, resolution quality, or consumer satisfaction.
+- Use “associated with,” “observed,” and “workload” language.
+- Do not claim that a company, state, product, or channel caused a complaint outcome.
+- Do not invent resolution time, satisfaction, retention, or consumer-harm measures.
+- Keep the stated 2023–2025 coverage, rate denominator, and raw-count limitations visible in the dashboard and portfolio README.

@@ -14,6 +14,19 @@ data/processed/*.db-*
 # Local inspection output generated during workbook validation.
 tableau/*.inspect.ndjson
 
+# Snowflake/dbt execution is local. Never commit credentials, dbt target files,
+# staging exports, or generated Tableau extracts.
+.env
+.env.*
+!.env.example
+.dbt/
+dbt/**/target/
+dbt/**/logs/
+dbt/**/dbt_packages/
+data/exports/
+data/processed/snowflake_validation.json
+scripts/*.log
+
 # System and editor files.
 .DS_Store
 __pycache__/

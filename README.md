@@ -1,98 +1,126 @@
-# CFPB Complaint Operations Analytics
+# CFPB Complaint Operations Analytics | Tableau, Snowflake, dbt, SQL
 
-Interactive Tableau case study of consumer-complaint operations using the official Consumer Financial Protection Bureau (CFPB) Consumer Complaint Database.
+An operations analytics case study using the official CFPB Consumer Complaint Database. It turns a privacy-minimized 2023–2025 complaint extract into validated warehouse models and compact Tableau-ready aggregates.
 
-**Live dashboard:** [CFPB Complaint Operations Analytics on Tableau Public](https://public.tableau.com/views/CFPBComplaintOperationsAnalytics/OperationsOverview?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+**Current Tableau Public dashboard:** [CFPB Complaint Operations Analytics](https://public.tableau.com/views/CFPBComplaintOperationsAnalytics/OperationsOverview?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
 
-## Business objective
+## Business questions
 
-Analyze how complaint operations changed from 2023 through 2025 and identify the product, geographic, and response-performance patterns that matter most for an operations team.
+- How did complaint workload change by month and year?
+- Which product and issue categories account for the largest share of observed workload?
+- What do published timely-response and known-response coverage rates look like?
+- How are complaints distributed by submission channel, company, and state?
+- Which patterns warrant operational attention without treating raw complaint counts as proof of company quality or consumer harm?
 
-## Dashboard
+## Scope, grain, and privacy
 
-The Tableau dashboard includes:
+| Item | Definition |
+|---|---|
+| Source | [CFPB Consumer Complaint Database](https://www.consumerfinance.gov/data-research/consumer-complaints/) |
+| Analysis period | Full calendar years 2023-01-01 through 2025-12-31 |
+| Grain | One published complaint record per Complaint ID |
+| Validated records | 9,363,711 |
+| 2026 handling | Excluded because it was incomplete at retrieval |
+| Privacy boundary | Consumer narratives, ZIP codes, and tags are not loaded to Snowflake or the Tableau source |
 
-- Monthly complaint-volume trend
-- Product workload ranking
-- Complaint volume by state (raw counts)
-- Timely-response rate by year
-
-## Key findings
-
-| Finding | Result |
-|---|---:|
-| Validated complaints analyzed | 9,363,711 |
-| 2023 complaint volume | 1,185,973 |
-| 2024 year-over-year growth | 130.55% |
-| 2025 year-over-year growth | 99.08% |
-| Largest product category | Credit reporting or other personal consumer reports (7,578,201; 80.93%) |
-| Highest-volume state (raw count) | Florida (1,340,357) |
-| Timely-response rate range | 99.55%–99.72% |
-
-## Scope and methodology
-
-- **Source:** [CFPB Consumer Complaint Database](https://www.consumerfinance.gov/data-research/consumer-complaints/)
-- **Analysis period:** January 1, 2023–December 31, 2025
-- **Record grain:** One published complaint record per Complaint ID
-- **2026 exclusion:** 2026 was incomplete at retrieval, so it was excluded from year-over-year comparisons.
-- **Privacy:** Consumer complaint narratives were excluded from all working and public project artifacts.
-- **Data preparation:** Chunked Python processing, data-type normalization, duplicate-ID validation, and SQLite summary generation.
-
-The analysis uses observed CFPB complaint workload. It does not treat complaint counts as market-share-adjusted measures of company quality or consumer harm.
-
-## Repository contents
+## Architecture
 
 ```text
-data/processed/summary/  Compact CSV tables used by the dashboard
-docs/                    Data dictionary, validation record, source notes, and operations memo
-excel/                   Data-quality review workbook
-scripts/                 Reproducible Python data-preparation and SQLite-summary scripts
-sql/                     Analysis queries
-tableau/                 Tableau-ready Excel source workbook
+Official CFPB CSV
+  -> Python chunked preparation + initial validation
+  -> Snowflake RAW.COMPLAINTS_CSV (privacy-minimized)
+  -> dbt staging, dimensions, fact table, marts, and tests
+  -> reconciliation checks
+  -> aggregate Tableau extract workbook
+  -> one Tableau Public dashboard
 ```
 
-The raw CFPB download and row-level processed files are deliberately excluded from GitHub because they total roughly 19 GB. The compact summary tables, source workbook, scripts, and validation evidence are included.
+Tableau Public does **not** use a live Snowflake connection. The public dashboard is refreshed from a compact, aggregate extract generated from the Snowflake dbt marts. This is intentional and documented rather than presented as a live connection.
 
-## Reproduce the analysis
+## Data model
 
-1. Download the [official CFPB complaint CSV](https://files.consumerfinance.gov/ccdb/complaints.csv.zip) and extract it to `data/raw/complaints.csv`.
-2. Create a Python environment and install dependencies:
+`fct_complaints` holds one valid Complaint ID. Its stable keys are Complaint ID, Date received, Company, published Product/Sub-product, and State. It relates logically to:
 
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
+- `dim_date`
+- `dim_company`
+- `dim_product`
+- `dim_state`
 
-3. Generate the filtered extract and QA workbook:
+The Tableau-facing marts are `mart_monthly_operations`, `mart_product_workload`, `mart_issue_workload`, `mart_response_performance`, `mart_channel_mix`, `mart_state_workload`, `mart_company_concentration`, and `mart_data_quality_reconciliation`.
 
-   ```bash
-   python scripts/prepare_data.py
-   ```
+See [the architecture and transformation log](docs/snowflake_dbt_architecture.md) and [the data dictionary](docs/data_dictionary.md).
 
-4. Build the SQLite analysis layer and dashboard-ready summaries:
+## Selected findings
 
-   ```bash
-   python scripts/build_sqlite.py
-   ```
-
-5. Open `tableau/CFPB_Tableau_Source.xlsx` in Tableau Public, or use the included dashboard-ready CSVs. See [`docs/tableau_build_spec.md`](docs/tableau_build_spec.md) for the worksheet design.
-
-## Validation
-
-| Check | Result |
+| Finding | Evidence |
 |---|---:|
-| Processed records | 9,363,711 |
-| Unique Complaint IDs | 9,363,711 |
-| Duplicate Complaint IDs | 0 |
-| Monthly periods | 36 |
-| Narrative data included | No |
-| Monthly and state totals reconciled | Yes |
+| Complaint workload rose sharply | 1,185,973 (2023) -> 2,734,308 (2024, +130.55%) -> 5,443,430 (2025, +99.08%) |
+| Credit-reporting workload dominates | 7,578,201 complaints (80.93%) under the current published label; an older/alternate label is intentionally kept separate |
+| Web is the primary intake channel | 97.24% (2023), 98.57% (2024), 99.34% (2025) |
+| Timely-response rate is high | 99.55% to 99.72%, calculated as Yes / (Yes + No) |
+| State counts require context | Florida, Texas, and California have the largest observed raw counts; no population denominator is used |
 
-See [`docs/qa_validation.md`](docs/qa_validation.md) for the full validation record and [`docs/source_notes.md`](docs/source_notes.md) for the source and interpretation caveats.
+The findings describe observed published complaint workload. They do not measure customer satisfaction, resolution time, validated misconduct, market-adjusted company quality, or causality.
 
-## Important interpretation notes
+## Repository layout
 
-- CFPB states that the database is not a statistical sample; counts should not be interpreted as market-share-adjusted quality rankings.
-- State values are raw complaint counts, not population-adjusted rates.
-- The two credit-reporting product labels are intentionally kept separate because they originate from different source taxonomy labels; they are not combined without a documented mapping.
+```text
+dbt/cfpb_complaint_operations/  Snowflake dbt project, source tests, fact, dimensions, marts
+sql/                            10 reviewed analysis queries and Snowflake setup scripts
+scripts/                        Preparation, Snowflake loading, reconciliation, and Tableau-export scripts
+data/processed/summary/         Compact pre-warehouse validation summaries
+data/exports/tableau/           Local-only aggregate dbt mart exports (ignored by Git)
+tableau/                        Tableau-ready extract workbook
+docs/                           KPI definitions, QA, architecture, dashboard specification, and memo
+excel/                          Initial data-quality review workbook
+```
+
+The original download and row-level processed data are not committed because they total roughly 19 GB. Compact summaries, code, validation definitions, and the Tableau source workbook are included.
+
+## Reproduce locally
+
+1. Download the [official CFPB complaint CSV](https://files.consumerfinance.gov/ccdb/complaints.csv.zip), extract it to `data/raw/complaints.csv`, and install dependencies.
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   python3 -m pip install -r requirements.txt
+   ```
+
+2. Build the local privacy-filtered extract and baseline checks.
+
+   ```bash
+   python3 scripts/prepare_data.py
+   python3 scripts/build_sqlite.py
+   ```
+
+3. Create a Snowflake trial/account, copy `.env.example` to `.env`, and set only your own account locator and username. External-browser authentication is the recommended method. Do not commit `.env`.
+
+4. Run the warehouse setup/load/dbt/test/export sequence.
+
+   ```bash
+   bash scripts/run_snowflake_pipeline.sh
+   ```
+
+5. Rebuild `tableau/CFPB_Tableau_Source.xlsx` from `data/exports/tableau/` in the Codex runtime, refresh the single Tableau dashboard, apply the documented actions/filters, and publish the extract snapshot to Tableau Public. See [deployment instructions](docs/dashboard_refresh_and_publish.md).
+
+## Validation status
+
+| Check | Status |
+|---|---|
+| 2023–2025 local source validation | Complete: 9,363,711 rows, 9,363,711 unique Complaint IDs, 0 duplicate IDs |
+| Initial compact-summary reconciliation | Complete: monthly and state totals reconcile to the validated record count |
+| Snowflake/dbt project code | Complete and testable |
+| Snowflake load, dbt run/test, and warehouse reconciliation | Pending execution in the account selected for this project |
+| Tableau Public refresh from generated dbt mart extract | Pending after the verified warehouse run |
+
+No resume or portfolio claim should say Snowflake/dbt or a refreshed Tableau extract was executed until the pending execution evidence is generated. The local and SQL implementation are present; the remaining account-specific deployment is deliberately explicit.
+
+## Documentation
+
+- [Data dictionary and KPI definitions](docs/data_dictionary.md)
+- [Transformation log and Snowflake/dbt architecture](docs/snowflake_dbt_architecture.md)
+- [Quality and reconciliation rules](docs/qa_validation.md)
+- [Tableau calculation, filter, action, and publish specification](docs/tableau_build_spec.md)
+- [Operational findings and recommendations](docs/operations_memo.md)
+- [Source notes and limitations](docs/source_notes.md)

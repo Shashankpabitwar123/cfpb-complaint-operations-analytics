@@ -1,2 +1,4 @@
 pandas>=2.2,<3
 XlsxWriter>=3.2,<4
+snowflake-connector-python>=3.12,<4
+dbt-snowflake>=1.9,<2
