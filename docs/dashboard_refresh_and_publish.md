@@ -5,14 +5,14 @@ This project requires user-owned Snowflake and Tableau sessions for deployment. 
 ## 1. Bootstrap Snowflake once
 
 1. Create or sign in to a Snowflake account/trial.
-2. Copy `.env.example` to `.env` and set your account locator and username. For this one bootstrap run only, set `SNOWFLAKE_ROLE=ACCOUNTADMIN`.
-3. Run the setup and initial load with external-browser authentication:
+2. Copy `.env.example` to `.env` and set your account locator, username, and password locally. For this one bootstrap run only, set `SNOWFLAKE_ROLE=ACCOUNTADMIN`. A self-service trial normally uses `SNOWFLAKE_AUTHENTICATOR=snowflake`; do not put `.env` into Git or chat.
+3. Run the setup and initial load with the local authenticated configuration:
 
    ```bash
    python3 scripts/load_to_snowflake.py --apply-setup --replace
    ```
 
-4. The setup script automatically grants the newly created `CFPB_PORTFOLIO_ROLE` to the current user. Change `.env` to `SNOWFLAKE_ROLE=CFPB_PORTFOLIO_ROLE` afterward. Keep `SNOWFLAKE_AUTHENTICATOR=externalbrowser` unless your organization requires another approved sign-in method.
+4. The setup script automatically grants the newly created `CFPB_PORTFOLIO_ROLE` to the current user. Change `.env` to `SNOWFLAKE_ROLE=CFPB_PORTFOLIO_ROLE` afterward.
 
 ## 2. Execute and validate the pipeline
 

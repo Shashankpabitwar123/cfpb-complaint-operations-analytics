@@ -94,7 +94,7 @@ The original download and row-level processed data are not committed because the
    python3 scripts/build_sqlite.py
    ```
 
-3. Create a Snowflake trial/account, copy `.env.example` to `.env`, and set only your own account locator and username. External-browser authentication is the recommended method. Do not commit `.env`.
+3. Create a Snowflake trial/account, copy `.env.example` to `.env`, and set your account locator, username, and password only on your own machine. A new self-service trial normally uses native password authentication; use `externalbrowser` only if your account has a configured SAML identity provider. Do not commit `.env`.
 
 4. Run the warehouse setup/load/dbt/test/export sequence.
 

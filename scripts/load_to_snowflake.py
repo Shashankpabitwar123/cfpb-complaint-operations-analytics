@@ -33,12 +33,11 @@ def connection_parameters(bootstrap: bool = False) -> dict[str, str]:
     During first-run bootstrap the project warehouse/database/schema do not exist,
     so they must not be included in the connection request.
     """
-    authenticator = os.getenv("SNOWFLAKE_AUTHENTICATOR", "externalbrowser")
+    authenticator = os.getenv("SNOWFLAKE_AUTHENTICATOR", "snowflake").lower()
     parameters = {
         "account": required_environment("SNOWFLAKE_ACCOUNT"),
         "user": required_environment("SNOWFLAKE_USER"),
         "role": os.getenv("SNOWFLAKE_ROLE", "CFPB_PORTFOLIO_ROLE"),
-        "authenticator": authenticator,
     }
     if not bootstrap:
         parameters.update({
@@ -46,8 +45,15 @@ def connection_parameters(bootstrap: bool = False) -> dict[str, str]:
             "database": os.getenv("SNOWFLAKE_DATABASE", "CFPB_ANALYTICS"),
             "schema": "RAW",
         })
-    if authenticator.lower() != "externalbrowser":
+    if authenticator == "externalbrowser":
+        parameters["authenticator"] = "externalbrowser"
+    elif authenticator in {"snowflake", "password"}:
         parameters["password"] = required_environment("SNOWFLAKE_PASSWORD")
+    else:
+        raise RuntimeError(
+            "Unsupported SNOWFLAKE_AUTHENTICATOR. Use 'snowflake' for a native trial "
+            "or 'externalbrowser' only for configured SAML SSO."
+        )
     return parameters
 
 

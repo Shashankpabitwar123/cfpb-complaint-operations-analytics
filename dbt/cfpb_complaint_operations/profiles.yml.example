@@ -7,7 +7,8 @@ cfpb_complaint_operations:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_USER') }}"
-      authenticator: "{{ env_var('SNOWFLAKE_AUTHENTICATOR', 'externalbrowser') }}"
+      authenticator: "{{ env_var('SNOWFLAKE_AUTHENTICATOR', 'snowflake') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', '') }}"
       role: "{{ env_var('SNOWFLAKE_ROLE', 'CFPB_PORTFOLIO_ROLE') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'CFPB_PORTFOLIO_WH') }}"
       database: "{{ env_var('SNOWFLAKE_DATABASE', 'CFPB_ANALYTICS') }}"

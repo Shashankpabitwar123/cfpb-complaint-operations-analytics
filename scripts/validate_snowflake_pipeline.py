@@ -23,7 +23,7 @@ def required_environment(name: str) -> str:
 
 
 def connection_parameters() -> dict[str, str]:
-    authenticator = os.getenv("SNOWFLAKE_AUTHENTICATOR", "externalbrowser")
+    authenticator = os.getenv("SNOWFLAKE_AUTHENTICATOR", "snowflake").lower()
     parameters = {
         "account": required_environment("SNOWFLAKE_ACCOUNT"),
         "user": required_environment("SNOWFLAKE_USER"),
@@ -31,10 +31,13 @@ def connection_parameters() -> dict[str, str]:
         "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE", "CFPB_PORTFOLIO_WH"),
         "database": os.getenv("SNOWFLAKE_DATABASE", "CFPB_ANALYTICS"),
         "schema": "ANALYTICS",
-        "authenticator": authenticator,
     }
-    if authenticator.lower() != "externalbrowser":
+    if authenticator == "externalbrowser":
+        parameters["authenticator"] = "externalbrowser"
+    elif authenticator in {"snowflake", "password"}:
         parameters["password"] = required_environment("SNOWFLAKE_PASSWORD")
+    else:
+        raise RuntimeError("Unsupported SNOWFLAKE_AUTHENTICATOR.")
     return parameters
 
 
