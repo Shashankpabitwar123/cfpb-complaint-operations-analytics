@@ -193,6 +193,13 @@ def main() -> None:
             cursor.execute(
                 f"PUT '{quote_local_file(SOURCE_FILE)}' {stage_path} AUTO_COMPRESS=TRUE OVERWRITE=TRUE PARALLEL=4"
             )
+            put_results = cursor.fetchall()
+            if not put_results:
+                raise RuntimeError("Snowflake PUT returned no staged-file result.")
+            put_statuses = [str(result[6]) for result in put_results]
+            if any(status not in {"UPLOADED", "SKIPPED"} for status in put_statuses):
+                raise RuntimeError(f"Snowflake PUT did not complete successfully: {put_results}")
+            print(f"Staged {len(put_results)} file part(s): {', '.join(put_statuses)}.")
 
             cursor.execute(
                 """
@@ -213,9 +220,22 @@ def main() -> None:
                 ON_ERROR = 'ABORT_STATEMENT'
                 """
             )
+            copy_results = cursor.fetchall()
+            if not copy_results:
+                raise RuntimeError("Snowflake COPY returned no file-load result.")
+            loaded_rows = sum(int(result[3] or 0) for result in copy_results)
+            copy_statuses = [str(result[1]) for result in copy_results]
+            if loaded_rows == 0:
+                raise RuntimeError(f"Snowflake COPY loaded zero rows: {copy_results}")
+            print(
+                f"Copied {loaded_rows:,} rows from {len(copy_results)} staged file part(s): "
+                f"{', '.join(copy_statuses)}."
+            )
 
             cursor.execute("SELECT COUNT(*), COUNT(DISTINCT COMPLAINT_ID_RAW) FROM COMPLAINTS_CSV")
             total_rows, distinct_ids = cursor.fetchone()
+            if total_rows == 0:
+                raise RuntimeError("Raw table contains zero rows after COPY; stopping pipeline.")
             print(f"Loaded {total_rows:,} rows with {distinct_ids:,} distinct raw Complaint IDs.")
 
             if arguments.remove_staged_file:
