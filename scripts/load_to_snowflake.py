@@ -27,17 +27,25 @@ def required_environment(name: str) -> str:
     return value
 
 
-def connection_parameters() -> dict[str, str]:
+def connection_parameters(bootstrap: bool = False) -> dict[str, str]:
+    """Return safe connection parameters for either bootstrap or project execution.
+
+    During first-run bootstrap the project warehouse/database/schema do not exist,
+    so they must not be included in the connection request.
+    """
     authenticator = os.getenv("SNOWFLAKE_AUTHENTICATOR", "externalbrowser")
     parameters = {
         "account": required_environment("SNOWFLAKE_ACCOUNT"),
         "user": required_environment("SNOWFLAKE_USER"),
         "role": os.getenv("SNOWFLAKE_ROLE", "CFPB_PORTFOLIO_ROLE"),
-        "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE", "CFPB_PORTFOLIO_WH"),
-        "database": os.getenv("SNOWFLAKE_DATABASE", "CFPB_ANALYTICS"),
-        "schema": "RAW",
         "authenticator": authenticator,
     }
+    if not bootstrap:
+        parameters.update({
+            "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE", "CFPB_PORTFOLIO_WH"),
+            "database": os.getenv("SNOWFLAKE_DATABASE", "CFPB_ANALYTICS"),
+            "schema": "RAW",
+        })
     if authenticator.lower() != "externalbrowser":
         parameters["password"] = required_environment("SNOWFLAKE_PASSWORD")
     return parameters
@@ -84,7 +92,7 @@ def main() -> None:
             f"Prepared source not found at {SOURCE_FILE}. Run scripts/prepare_data.py first."
         )
 
-    with snowflake.connector.connect(**connection_parameters()) as connection:
+    with snowflake.connector.connect(**connection_parameters(bootstrap=arguments.apply_setup)) as connection:
         with connection.cursor() as cursor:
             if arguments.apply_setup:
                 execute_sql_file(cursor, SETUP_SQL)
