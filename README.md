@@ -2,7 +2,9 @@
 
 An operations analytics case study using the official CFPB Consumer Complaint Database. It turns a privacy-minimized 2023–2025 complaint extract into validated warehouse models and compact Tableau-ready aggregates.
 
-**Current Tableau Public dashboard:** [CFPB Complaint Operations Analytics](https://public.tableau.com/views/CFPBComplaintOperationsAnalytics/OperationsOverview?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+**Published Tableau Public dashboard (extract snapshot):** [CFPB Complaint Operations Analytics](https://public.tableau.com/views/CFPBComplaintOperationsAnalytics/OperationsOverview?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+
+Published 2026-07-29 after a successful Tableau refresh from the generated Snowflake/dbt mart extract. Review the [dashboard PDF](docs/evidence/CFPB_Operations_Overview.pdf), [dashboard screenshot](docs/evidence/CFPB_Operations_Overview.png), or [packaged Tableau workbook](tableau/CFPB_Complaint_Operations_Analytics_Snowflake_dbt_Extract.twbx).
 
 ## Business questions
 
@@ -113,9 +115,9 @@ The original download and row-level processed data are not committed because the
 | Snowflake/dbt project code | Complete and executed |
 | Snowflake load, dbt run/test, and warehouse reconciliation | Complete on 2026-07-29: 9,363,711 raw/fact rows, 15 dbt models built, 31 tests passed, 6 reconciliation checks passed |
 | Tableau source workbook from generated dbt mart extract | Complete: rebuilt and visually verified as a Snowflake dbt mart extract snapshot |
-| Tableau Public refresh from generated dbt mart extract | Pending manual refresh and republish of the existing dashboard |
+| Tableau Public refresh from generated dbt mart extract | Complete on 2026-07-29: refreshed, recalculated the timely-response rate in Tableau, visually checked, and republished as an extract snapshot |
 
-Resume and portfolio materials may accurately claim Snowflake, dbt, SQL, data-quality testing, and reconciliation for this project. Do not call the public Tableau dashboard a live Snowflake connection, and do not claim it was refreshed from this extract until the manual Tableau republish step is complete.
+Resume and portfolio materials may accurately claim Snowflake, dbt, SQL, data-quality testing, reconciliation, Tableau calculated fields, and a published Tableau dashboard for this project. Do not call the public Tableau dashboard a live Snowflake connection; it is a published extract snapshot.
 
 ## Documentation
 
@@ -124,4 +126,5 @@ Resume and portfolio materials may accurately claim Snowflake, dbt, SQL, data-qu
 - [Quality and reconciliation rules](docs/qa_validation.md)
 - [Tableau calculation, filter, action, and publish specification](docs/tableau_build_spec.md)
 - [Operational findings and recommendations](docs/operations_memo.md)
+- [Published dashboard evidence](docs/evidence/README.md)
 - [Source notes and limitations](docs/source_notes.md)

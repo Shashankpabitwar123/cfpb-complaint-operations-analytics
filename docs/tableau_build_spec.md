@@ -11,13 +11,15 @@ After a successful Snowflake/dbt run, connect Tableau to `tableau/CFPB_Tableau_S
 - Monthly Operations
 - Product Workload
 - Issue Workload
-- Response Performance
+- Response Performance by Product
 - Channel Mix
 - State Workload
 - Company Concentration
 - Quality Reconciliation
 
 Do not connect Tableau Public to raw complaints or claim a live Snowflake data source. The workbook is an extract snapshot generated from Snowflake dbt marts.
+
+The workbook also contains four legacy-named adapter sheets (`Monthly Volume`, `Product Summary`, `State Summary`, and `Response Performance`). They are a compatibility layer for the original Tableau workbook's existing views. They are derived from the same Snowflake/dbt mart snapshot and are not a separate source of truth.
 
 ## Layout and views
 

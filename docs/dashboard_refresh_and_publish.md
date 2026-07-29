@@ -42,7 +42,7 @@ Run the existing `scripts/build_tableau_source.mjs` in the Codex/runtime environ
 ## 4. Refresh the one Tableau dashboard
 
 1. Open the existing Tableau workbook/dashboard, not a new dashboard project.
-2. Replace/refresh the data source using `tableau/CFPB_Tableau_Source.xlsx`.
+2. Refresh the existing connection using `tableau/CFPB_Tableau_Source.xlsx`. The source now includes legacy-compatible adapter sheets for the four existing views, so refresh first; do not rebuild the dashboard or manually replace fields unless Tableau reports a remaining error.
 3. Apply every field, filter, action, tooltip, and limitation listed in [the Tableau build specification](tableau_build_spec.md).
 4. Use the [Tableau reconciliation protocol](qa_validation.md#tableau-reconciliation-protocol).
 5. Export a dashboard PDF and screenshots for the repository.
