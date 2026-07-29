@@ -189,9 +189,10 @@ def main() -> None:
                         "RAW.COMPLAINTS_CSV is not empty. Use --replace only if you intentionally want to reload it."
                     )
 
-            stage_path = "@CFPB_LOCAL_STAGE/cfpb_complaints_2023_2025.csv.gz"
+            stage_root = "@CFPB_LOCAL_STAGE"
+            staged_file = f"{stage_root}/cfpb_complaints_2023_2025.csv.gz"
             cursor.execute(
-                f"PUT '{quote_local_file(SOURCE_FILE)}' {stage_path} AUTO_COMPRESS=TRUE OVERWRITE=TRUE PARALLEL=4"
+                f"PUT '{quote_local_file(SOURCE_FILE)}' {stage_root} AUTO_COMPRESS=TRUE OVERWRITE=TRUE PARALLEL=4"
             )
             put_results = cursor.fetchall()
             if not put_results:
@@ -202,7 +203,7 @@ def main() -> None:
             print(f"Staged {len(put_results)} file part(s): {', '.join(put_statuses)}.")
 
             cursor.execute(
-                """
+                f"""
                 COPY INTO COMPLAINTS_CSV (
                     DATE_RECEIVED_RAW, PRODUCT_RAW, SUB_PRODUCT_RAW, ISSUE_RAW, SUB_ISSUE_RAW,
                     COMPANY_PUBLIC_RESPONSE_RAW, COMPANY_RAW, STATE_RAW, SUBMITTED_VIA_RAW,
@@ -214,7 +215,7 @@ def main() -> None:
                     SELECT
                         t.$1, t.$2, t.$3, t.$4, t.$5, t.$6, t.$7, t.$8,
                         t.$11, t.$12, t.$13, t.$14, t.$15, t.$16, t.$17, t.$18, t.$19
-                    FROM @CFPB_LOCAL_STAGE/cfpb_complaints_2023_2025.csv.gz
+                    FROM {staged_file}
                          (FILE_FORMAT => 'CFPB_CSV_FORMAT') t
                 )
                 ON_ERROR = 'ABORT_STATEMENT'
@@ -239,7 +240,7 @@ def main() -> None:
             print(f"Loaded {total_rows:,} rows with {distinct_ids:,} distinct raw Complaint IDs.")
 
             if arguments.remove_staged_file:
-                cursor.execute(f"REMOVE {stage_path}")
+                cursor.execute(f"REMOVE {staged_file}")
                 print("Removed the staged compressed source file.")
 
 
